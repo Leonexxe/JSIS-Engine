@@ -38,7 +38,7 @@ int main(int argc,char** argv)
     unsigned long long dTotal = 0;
     for(unsigned long long I : times)
         dTotal+=I;
-    auto total = std::chrono::nanoseconds(dTotal); 
+    auto total = std::chrono::nanoseconds(dTotal);
     dTotal/=runs;
     auto avg = std::chrono::nanoseconds(dTotal);
 
