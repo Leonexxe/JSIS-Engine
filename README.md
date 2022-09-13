@@ -7,5 +7,5 @@ I ran a test of printing 1000001 chars 100 times and these were the average time
   ### JSIS 1.0:         93ms
   ### Java 8:           787ms
 feel free to run the tests yourself
-  java main
-  make compare(adust paths in makefile first)
+  - java main
+  - make compare(adust paths in makefile first)
