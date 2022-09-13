@@ -1,0 +1,9 @@
+JSIS:
+total time elapsed: 9[s]
+9314[ms]
+9314712[µs]
+9314712874[ns]
+average time elapsed: 0[s]
+93[ms]
+93147[µs]
+93147128[ns]

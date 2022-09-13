@@ -1,0 +1,9 @@
+C++:
+total time elapsed: 6[s]
+6231[ms]
+6231669[µs]
+6231669325[ns]
+average time elapsed: 0[s]
+62[ms]
+62316[µs]
+62316693[ns]
