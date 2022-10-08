@@ -22,7 +22,7 @@ namespace JSIS::engine
         std::stack<u64> rv;
         std::stack<u64> _this;
         std::stack<u64> error;
-        std::stack<u64*> args;
+        std::stack<memory*> args;
         
         //gp stacks
         std::stack<r64> sax;
@@ -34,8 +34,9 @@ namespace JSIS::engine
         std::stack<r64> sgx;
         std::stack<r64> shx;
 
-        //specific register
+        //specific registers
         r64 pc = 0;
+        r64 aas = 0;
 
         //gp registers
         r64 rax = 0;

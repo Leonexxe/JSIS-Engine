@@ -19,4 +19,5 @@ namespace JSIS::engine
     typedef double f64;
 
     typedef u64 r64;
+    typedef u64 memory;
 }

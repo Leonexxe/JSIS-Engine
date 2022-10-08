@@ -100,7 +100,7 @@ namespace JSIS::engine
     {
         if(running)
             return 0;
-        this->objects = (void**)malloc(0);
+        this->objects = (memory*)malloc(0);
         this->startThread(name,entry,enviornment);
         return 1;
     }

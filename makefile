@@ -8,10 +8,10 @@
 # -----                                                                                                      #
 # You may not remove or alter this copyright header.                                                         #
 ##############################################################################################################
-all: main cppCompare
-
 main:
-	clang++ ./main.cpp -o ./bin/JSIS -std=c++20 -Wno-return-type
+	clang++ ./standalone.cpp -o ./bin/JSIS -std=c++20 -Wno-return-type
+
+all: main cppCompare
 
 cppCompare:
 	clang++ ./cppCompare.cpp -o ./bin/JSIS_CPPCompare -std=c++20 -Wno-return-type

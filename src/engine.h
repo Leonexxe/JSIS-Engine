@@ -42,7 +42,7 @@ namespace JSIS::engine
         bool gFreeze = false;
         bool quit = false;
         bool externalInterrupts = 0;
-        void** objects;
+        memory* objects;
         std::vector<std::thread*> __internal_dead_threads;
         std::ostream* out = &std::cout;
         interrupt* interrupts;

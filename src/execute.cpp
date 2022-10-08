@@ -392,7 +392,7 @@ namespace JSIS::engine::execute
                 }
                 case(ASS_UPDATE):
                 {
-                    e->objects = (void**)realloc(e->objects,e->enviornment.top().oc);
+                    e->objects = (u64**)realloc(e->objects,e->enviornment.top().oc*sizeof(u64));
                     std::cout << "updated objects array to size of " << e->enviornment.top().oc << std::endl;
                     *I+=1;
                     continue;
@@ -457,251 +457,28 @@ namespace JSIS::engine::execute
         e->rt--;
     }
 
+    u64 getValue(u64 source){}
+    void writeMem(u64 address,u64 value){}
+    void copyMem(u64 source,u64 dest,u64 size){}
+    void copy(u64 source,u64 dest){}
+    void readRegister(u64 reg,u64 dest){}
+    void writeRegister(u64 reg,u64 source){}
+    void readStack(u64 stack,u64 dest){}
+    void writeStack(u64 stack, u64 source){}
+
     void execute(u64* instructions,engine* e,thread* t)
     {
         r64* I = &t->enviornment.top().pc;
-        while(!(*I>=e->iSize))
+        switch(instructions[*I])
         {
-            if(e->quit)
-            {
-                std::cout << "[ERROR] execution terminated unexpectedly" << std::endl;
-                break;
+            case(ASS_MOV):{
+                writeMem(instructions[*I+2],instructions[*I+1]);
+                *I+=3;
             }
-            while(e->gFreeze);
-            switch(instructions[*I])
-            {
-                case(ASS_WRITE):
-                    *(u64*)e->objects[instructions[*I+1]] = *(u64*)e->objects[instructions[*I+2]];
-                    *I+=3;
-                    continue;
-                case(ASS_JMP):
-                    *I=instructions[*I+1];
-                    continue;
-                case(ASS_VJMP):
-                    *I=*(u64*)e->objects[instructions[*I+1]];
-                    continue;
-                case(ASS_RET):
-                    *I=t->enviornment.top().ret.top();
-                    continue;
-                case(ASS_PUSHA):
-                    t->enviornment.top().args.push((u64*)malloc(sizeof(void*)*t->enviornment.top().AAS));
-                    (*I)++;
-                    continue;
-                case(ASS_POPA):
-                    t->enviornment.top().args.pop();
-                    (*I)++;
-                    continue;
-                case(ASS_PUSH):{
-                    std::stack<u64>* stack = nullptr;
-                    switch(instructions[*I+1])
-                    {
-                        // specific stacks
-                        case(0x0): stack = &t->enviornment.top().ret;break;
-                        case(0x1): stack = &t->enviornment.top().rv;break;
-                        case(0x2): stack = &t->enviornment.top()._this;break;
-                        case(0x3): stack = &e->enviornment.top().error;break;
-                        // gp stacks
-                        case(0x10): stack = &t->enviornment.top().sax;break;
-                        case(0x11): stack = &t->enviornment.top().sbx;break;
-                        case(0x12): stack = &t->enviornment.top().scx;break;
-                        case(0x13): stack = &t->enviornment.top().sdx;break;
-                        case(0x14): stack = &t->enviornment.top().sex;break;
-                        case(0x15): stack = &t->enviornment.top().sfx;break;
-                        case(0x16): stack = &t->enviornment.top().sgx;break;
-                        case(0x17): stack = &t->enviornment.top().shx;break;
-                        // global gp stacks
-                        case(0x18): stack = &t->enviornment.top().sax;break;
-                        case(0x19): stack = &t->enviornment.top().sbx;break;
-                        case(0x1A): stack = &t->enviornment.top().scx;break;
-                        case(0x1B): stack = &t->enviornment.top().sdx;break;
-                        case(0x1C): stack = &t->enviornment.top().sex;break;
-                        case(0x1D): stack = &t->enviornment.top().sfx;break;
-                        case(0x1E): stack = &t->enviornment.top().sgx;break;
-                        case(0x1F): stack = &t->enviornment.top().shx;break;
-
-                        //error
-                        default:
-                            error(instructions,e,t,"stack not found: "+std::to_string(instructions[*I+1]),_error::INVALID_STACK);
-                            *I+=3;
-                            continue;
-                    }
-                    //stack->push(*(u64*)e->objects[instructions[*I+2]]);
-                    stack->push(instructions[*I+2]);
-                    *I+=3;
-                    continue;}
-                case(ASS_POP):{
-                    std::stack<r64>* stack = nullptr;
-                    switch(instructions[*I+1])
-                    {
-                        // specific stacks
-                        case(0x0): stack = &t->enviornment.top().ret;break;
-                        case(0x1): stack = &t->enviornment.top().rv;break;
-                        case(0x2): stack = &t->enviornment.top()._this;break;
-                        case(0x3): stack = &e->enviornment.top().error;break;
-                        // gp stacks
-                        case(0x10): stack = &t->enviornment.top().sax;break;
-                        case(0x11): stack = &t->enviornment.top().sbx;break;
-                        case(0x12): stack = &t->enviornment.top().scx;break;
-                        case(0x13): stack = &t->enviornment.top().sdx;break;
-                        case(0x14): stack = &t->enviornment.top().sex;break;
-                        case(0x15): stack = &t->enviornment.top().sfx;break;
-                        case(0x16): stack = &t->enviornment.top().sgx;break;
-                        case(0x17): stack = &t->enviornment.top().shx;break;
-                        // global gp stacks
-                        case(0x18): stack = &e->enviornment.top().gsax;break;
-                        case(0x19): stack = &e->enviornment.top().gsbx;break;
-                        case(0x1A): stack = &e->enviornment.top().gscx;break;
-                        case(0x1B): stack = &e->enviornment.top().gsdx;break;
-                        case(0x1C): stack = &e->enviornment.top().gsex;break;
-                        case(0x1D): stack = &e->enviornment.top().gsfx;break;
-                        case(0x1E): stack = &e->enviornment.top().gsgx;break;
-                        case(0x1F): stack = &e->enviornment.top().gshx;break;
-
-                        //error
-                        default:
-                            error(instructions,e,t,"stack not found: "+std::to_string(instructions[*I+1]),_error::INVALID_STACK);
-                            *I+=2;
-                            continue;
-                    }
-                    stack->pop();
-                    *I+=2;
-
-                    continue;}
-                case(ASS_INT):{
-                    interrupt _int_ = e->interrupts[instructions[*I+1]];
-                    if(_int_ == nullptr)
-                        error(instructions,e,t,"invalid interrupt: "+std::to_string(instructions[*I+1]),_error::INVALID_INTERRUPT);
-                    _int_(instructions,e,t);
-                    *I+=2;
-                    continue;}
-                case(ASS_EMOV):{
-                    r64* reg = nullptr;
-                    switch(instructions[*I+1])
-                    {
-                        //specific registers
-                        case(0x0): reg=&t->enviornment.top().pc;break;
-                        case(0x1): reg=&e->enviornment.top().oc;break;
-                        //local gp registers
-                        case(0x10): reg=&t->enviornment.top().rax;break;
-                        case(0x11): reg=&t->enviornment.top().rbx;break;
-                        case(0x12): reg=&t->enviornment.top().rcx;break;
-                        case(0x13): reg=&t->enviornment.top().rdx;break;
-                        case(0x14): reg=&t->enviornment.top().rex;break;
-                        case(0x15): reg=&t->enviornment.top().rfx;break;
-                        case(0x16): reg=&t->enviornment.top().rgx;break;
-                        case(0x17): reg=&t->enviornment.top().rhx;break;
-                        case(0x18): reg=&t->enviornment.top().rix;break;
-                        case(0x19): reg=&t->enviornment.top().rjx;break;
-                        case(0x1A): reg=&t->enviornment.top().rkx;break;
-                        case(0x1B): reg=&t->enviornment.top().rlx;break;
-                        case(0x1C): reg=&t->enviornment.top().rmx;break;
-                        case(0x1D): reg=&t->enviornment.top().rox;break;
-                        case(0x1E): reg=&t->enviornment.top().rpx;break;
-                        case(0x1F): reg=&t->enviornment.top().rqx;break;
-                        //global gp registers
-                        case(0x20): reg=&e->enviornment.top().gax;break;
-                        case(0x21): reg=&e->enviornment.top().gbx;break;
-                        case(0x22): reg=&e->enviornment.top().gcx;break;
-                        case(0x23): reg=&e->enviornment.top().gdx;break;
-                        case(0x24): reg=&e->enviornment.top().gex;break;
-                        case(0x25): reg=&e->enviornment.top().gfx;break;
-                        case(0x26): reg=&e->enviornment.top().ggx;break;
-                        case(0x27): reg=&e->enviornment.top().ghx;break;
-                        case(0x28): reg=&e->enviornment.top().gix;break;
-                        case(0x29): reg=&e->enviornment.top().gjx;break;
-                        case(0x2A): reg=&e->enviornment.top().gkx;break;
-                        case(0x2B): reg=&e->enviornment.top().glx;break;
-                        case(0x2C): reg=&e->enviornment.top().gmx;break;
-                        case(0x2D): reg=&e->enviornment.top().gox;break;
-                        case(0x2E): reg=&e->enviornment.top().gpx;break;
-                        case(0x2F): reg=&e->enviornment.top().gqx;break;
-
-                        //error
-                        default:
-                            error(instructions,e,t,"register not found: "+std::to_string(instructions[*I+1]),_error::INVALID_STACK);
-                            *I+=3;
-                            continue;
-                    }
-                    *reg = instructions[*I+2];
-                    *I+=3;
-                    continue;}
-                case(ASS_JNZ):
-                {
-                    if(*(u64*)e->objects[instructions[*I+1]] != 0)
-                        *I=instructions[*I+2];//jump
-                    else
-                        *I+=3;
-                    continue;
-                }
-                case(ASS_VJNZ):
-                {
-                    if(*(u64*)e->objects[instructions[*I+1]] != 0)
-                        *I=*(u64*)e->objects[instructions[*I+2]];//jump
-                    else
-                        *I+=3;
-                    continue;
-                }
-                case(ASS_UPDATE):
-                {
-                    e->objects = (void**)realloc(e->objects,e->enviornment.top().oc);
-                    *I+=1;
-                    continue;
-                }
-                case(ASS_ADD):
-                {
-                    *(u64*)e->objects[instructions[*I+1]] += *(u64*)e->objects[instructions[*I+2]];
-                    *I+=3;
-                    continue;
-                }
-                case(ASS_SUB):
-                {
-                    *(u64*)e->objects[instructions[*I+1]] -= *(u64*)e->objects[instructions[*I+2]];
-                    *I+=3;
-                    continue;
-                }
-                case(ASS_MUL):
-                {
-                    *(u64*)e->objects[instructions[*I+1]] *= *(u64*)e->objects[instructions[*I+2]];
-                    *I+=3;
-                    continue;
-                }
-                case(ASS_DIV):
-                {
-                    *(u64*)e->objects[instructions[*I+1]] /= *(u64*)e->objects[instructions[*I+2]];
-                    *I+=3;
-                    continue;
-                }
-                case(ASS_MOD):
-                {
-                    //_ *(u64*)e->objects[instructions[*I+1]] target
-                    //_ *(u64*)e->objects[instructions[*I+2]] mod
-                    *(u64*)e->objects[instructions[*I+1]] -= floor(*(u64*)e->objects[instructions[*I+1]] / *(u64*)e->objects[instructions[*I+2]]);
-                    *I+=3;
-                    continue;
-                }
-                case(ASS_MOV):
-                {
-                    *(u64*)e->objects[instructions[*I+1]] = instructions[*I+2];
-                    *I+=3;
-                    continue;
-                }
-                case(ASS_MALLOC):
-                {
-                    e->objects[instructions[*I+1]] = malloc(instructions[*I+2]);
-                    *I+=3;
-                    continue;
-                }
-                case(ASS_HLT):
-                    *I+=1;
-                    goto endLoop;
-                default:
-                    error(instructions,e,t,"invalid instruction"+std::to_string(instructions[*I]),_error::INVALID_INSTRUCTION);
-                    goto endLoop;
+            case(ASS_WRITE):{
+                copy(instructions[*I+1],instructions[*I+1]);
+                *I+=3;
             }
         }
-        std::cout << "[INFO] execution complete, end of code!" << std::endl;
-        endLoop: ;
-        e->__internal_dead_threads.push_back(t->t);
-        e->rt--;
     }
 }
